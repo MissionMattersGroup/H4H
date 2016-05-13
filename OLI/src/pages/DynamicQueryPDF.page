@@ -1,0 +1,143 @@
+<!-- This Page is used to show client, Goals and Objective Details as a PDF -->
+<apex:page controller="DynamicQueryForDreamMap"  applyHtmlTag="false" 
+           showHeader="false" 
+           readOnly="true"
+           renderAs="Pdf">
+
+   <head>
+    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <!-- Css file added from static resource -->
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_PDF.css')}"/>
+    <!-- Css file added from static resource -->
+    </head>
+    <body style="height:50px;">
+    <apex:form >
+  
+     <div >
+        <img src="{!logoUrl}" alt="Company Logo" height="{!heightImg}" width="{!widthImg}" class="logoWidth"/>
+     </div>
+    <apex:outputPanel id="theOutPanelSearch" rendered="{!NOT(ISNULL(objConfigList.sObject_1__c))}"> 
+        <div style="background-color:{!PdfBackgroundColour};" class="ClientDetailsDiv">
+            <ul class="ClientDetailsDivul">
+            <li> <p class="ClientDetailsDivli"><b><u>{!mapApiNameLabel[objConfigList.sObject_1__c]} Details</u></b></p></li>
+            </ul>
+            <!-- Start of PageBlock -->
+             <apex:pageBlock >
+                 <apex:outputPanel id="detailPanel" styleclass="ClientDetailsDivOutputpanel">
+                        <apex:pageblockSection columns="2">
+                            <apex:repeat value="{!clientDetails}" var="or">
+                                <apex:repeat value="{!accessibleFieldsForClient}" var="accField">
+                                   <table cellpadding="6">  <tr class="ClientDetailsDivtr">
+                                            <th class="sectionHead" style="padding-left: 140px !important; word-wrap: break-word !important;word-break: break-all !important;">{!$ObjectType[objName].fields[accField].Label}:</th> 
+                                            <td class="sectionHead" style="padding-right: -50px !important; word-wrap: break-word !important;word-break: break-all !important;">{!or[accField]}</td>
+                                    </tr>
+                                    </table> 
+                                </apex:repeat>
+                            </apex:repeat>
+                        </apex:pageblockSection>
+                </apex:outputPanel>
+            </apex:pageBlock>  
+            <!-- End of PageBlock -->
+         </div><br/><br/>
+         
+         <div style="background-color:{!PdfBackgroundColour};" class="DreamMapDetailsSelected">
+            <ul class="ClientDetailsDivul">
+            <li> <p class="ClientDetailsDivli"><b><u>{!mapApiNameLabel[objConfigList.sObject_2__c]} Details</u></b></p></li>
+            </ul>
+            <!-- Start of PageBlock -->
+             <apex:pageBlock >
+                     <apex:outputPanel id="detailPanel" styleclass="ClientDetailsDivOutputpanel">
+                    <apex:pageblockSection columns="2">
+                       <apex:repeat value="{!dreamMapDetailsSelectedId}" var="or">
+                            <apex:repeat value="{!accessibleFieldsForDreamMap}" var="accField">
+                               <table cellpadding="6">  <tr class="ClientDetailsDivtr">
+                                        <!--<th class="sectionHead" style="padding-left: 140px !important;">{!$ObjectType[objDreamMapName].fields[accField].Label}:</th> -->
+                                        <td class="sectionHead" style="padding-right: -50px !important;"> <apex:outputField value="{!or[accField]}"/></td>
+                                </tr>
+                                </table>
+                            </apex:repeat>
+                        </apex:repeat>
+                    </apex:pageblockSection>
+                </apex:outputPanel>
+            </apex:pageBlock>
+            <!-- End of PageBlock -->
+         </div><br/>
+         
+            <p class="GoalsAndObjectivePG"><b><u>{!mapApiNameLabel[objConfigList.sObject_3__c]} And {!mapApiNameLabel[objConfigList.sObject_4__c]} Details</u></b></p>
+            <div class="GoalsAndObjectiveDiv">
+              <!-- Start of Table -->
+              <table border="1" class="goalObjTable">
+                 <apex:repeat value="{!AllRecords}" var="rec">
+                    <thead>
+                        <tr style="background-color:{!trBgColorGoal};">
+                            <apex:repeat value="{!accessibleFieldsForGoals}" var="fieldsForGoal">
+                                 <apex:outputText rendered="{!IF(ISNULL(dreamMapField ), TRUE, $ObjectType[objGoalName].fields[fieldsForGoal].Label != dreamMapField)}">
+                                    <th>{!$ObjectType[objGoalName].fields[fieldsForGoal].Label}</th>
+                                 </apex:outputText>
+                            </apex:repeat>
+                        </tr>
+                    </thead>
+                     <tbody>
+                        <tr class="goalObjTableSecondTr" style="background-color:{!tdBgColorGoal };">
+                            <apex:repeat value="{!accessibleFieldsForGoals}" var="fieldsForGoal"> 
+                                <apex:outputText rendered="{!IF(ISNULL(dreamMapField ), TRUE, $ObjectType[objGoalName].fields[fieldsForGoal].Label != dreamMapField)}">
+                                    <td><apex:outputField value="{!rec.sObj[fieldsForGoal]}" /></td>
+                                </apex:outputText>
+                            </apex:repeat>
+                        </tr>
+                        <tr>
+                        <td colspan="{!accessibleFieldsForGoals.size}">
+                        <table border="1" class="innerTable">
+                        <thead>
+                            <tr class="goalObjTableThirdTr" style="background-color:{!trBgColorObjective };" >
+                                <apex:repeat value="{!accessibleFieldsForObjectives}" var="fieldsForObjective" >
+                                    <apex:outputText rendered="{!goalField !=$ObjectType[objObjectiveName].fields[fieldsForObjective].Label}">
+                                        <th>{!$ObjectType[objObjectiveName].fields[fieldsForObjective].Label}</th>
+                                    </apex:outputText>    
+                                </apex:repeat>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <apex:repeat value="{!rec.children}" var="child" id="childRepeat">
+                                <tr class="ChildRepeatTr" style="background-color:{!tdBgColorObjective };" id="theRow">
+                                     <apex:repeat value="{!accessibleFieldsForObjectives}" var="fieldsForObjective" id="theRepeat">
+                                         <apex:outputText rendered="{!goalField !=$ObjectType[objObjectiveName].fields[fieldsForObjective].Label}">
+                                            <td class="GoalsAndObjective">
+                                                <apex:outputField value="{!child.sObj[fieldsForObjective]}" rendered="{!or(!child.toggleEditSave,canEdit)}"/>
+                                                <apex:inputField value="{!child.sObj[fieldsForObjective]}" rendered="{!and(child.toggleEditSave,!canEdit)}"/>
+                                            </td>
+                                           </apex:outputText> 
+                                    </apex:repeat>
+                                </tr>
+                            </apex:repeat>
+                        </tbody>
+                   </table>
+                   </td>
+                   </tr>
+                   <tr> <td colspan="{!accessibleFieldsForObjectives.size + 4}">&nbsp;</td>
+                   </tr>
+                   </tbody>
+                </apex:repeat>
+                </table></div><br/><br/>
+                <!-- End of Table -->
+                <apex:outputPanel rendered="{!signatureList.size > 0}">
+                    <div style="background-color:{!PdfBackgroundColour};" class="ClientDetailsDiv">
+                        <ul class="ClientDetailsDivul">
+                            <li> <p class="ClientDetailsDivli"><b><u>{!$label.Label_For_Signature}</u></b></p></li>
+                        </ul>
+                        <apex:outputPanel >
+                            <apex:repeat value="{!signatureList}" var="sign">
+                                <table cellpadding="6" style="width: 100%;"><tr>
+                                    <td style="width: 15%;"></td>
+                                    <td style="width: 40%; font-weight: bold;"><apex:outputField value="{!sign.Name}" rendered="{!sign.IsActive__c}"/><br/></td>
+                                    <td style="width: 40%; font-weight: bold;"><apex:outputText value="Date :" rendered="{!sign.IsActive__c}"/><br/></td>
+                                    </tr>
+                                </table>
+                           </apex:repeat>
+                        </apex:outputPanel>
+                    </div>
+                </apex:outputPanel>
+        </apex:outputPanel> 
+    </apex:form>
+    </body>
+</apex:page>

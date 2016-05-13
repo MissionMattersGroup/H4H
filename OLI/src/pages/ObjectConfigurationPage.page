@@ -1,0 +1,188 @@
+<apex:page controller="ObjectConfigurationController">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMap_Setup_page.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_Loading.css')}"/>
+
+    <apex:form id="formId">
+        <apex:actionFunction name="refresh" action="{!refresh}" rerender="theNewPanel, theNewPanel1, theNewPanel2, 
+                theNewPanel3, theSubPanel, theSubPanel1, theSubPanel2, theSubPanel3"/>
+                
+        <apex:pageMessages id="pgMsg" /> 
+        <apex:pageblock tabStyle="account">
+            <apex:actionStatus id="statusBar" layout="block">
+               <apex:facet name="start">
+                 <div id="assign-action-spinner-main">
+                    <div id="assign-action-spinner-content">
+                    <img src="/img/analytics/reportbuilder/icons/spinner32.gif" alt="Processing..." title="Processing..." /> 
+                    <p>Processing...</p>
+                 </div>
+                </div>
+              </apex:facet>
+            </apex:actionStatus>
+            <apex:pageBlockButtons location="bottom">
+                <apex:commandButton action="{!customSave}" value="Save" styleclass="myButton"/>
+            </apex:pageBlockButtons>
+            
+            <apex:pageblockSection title="Primary Object">
+                    <apex:selectList id="AllFields" value="{!primaryObj}" size="1" label="Select Primary Object" onchange="showFirstObjectFields();">
+                        <apex:selectOptions value="{!AllObjects}"/>
+                         <apex:actionFunction name="showFirstObjectFields" action="{!disFirstObjFields}" status="statusBar" 
+                            reRender="firstLvlChilds,secLvlChilds,thirdLvlObj,theNewPanel,theSubPanel">
+                            <apex:param name="firstparam" assignto="{!isFromLink}" value="false" />
+                         </apex:actionFunction>
+                    </apex:selectList>
+                <apex:pageblockSectionitem >
+                    <apex:outputPanel id="theNewPanel" styleclass="newPanel">
+                        <apex:outputPanel id="inPanel" rendered="{!showFieldsOne}">
+                            <c:MultiselectPicklist leftLabel="Available Fields"
+                                leftOption="{!PrimaryObjFields}"
+                                rightLabel="Selected Fields"
+                                rightOption="{!firstObjFields}"
+                                size="14"
+                                width="150px"/>
+                       </apex:outputPanel>
+                   </apex:outputPanel>
+               </apex:pageblockSectionitem>
+               <apex:pageblockSectionitem >
+                    <apex:outputPanel id="theSubPanel">
+                        <apex:outputPanel id="theCountPanel">
+                            <apex:outputLabel value="Selected Field Count" styleclass="selectedField" rendered="{!!showFieldsOne}">
+                               <apex:outputText label="Show Count" value="{!firstObjFields.size} Fields Selected" styleclass="showFieldCount" rendered="{!!showFieldsOne}"/>
+                            </apex:outputLabel>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="theModifyPanel" styleclass="newPanel">
+                            <apex:commandLink action="{!disFirstObjFields}" rendered="{!!showFieldsOne}" styleclass="modifyField" 
+                                     status="statusBar" value="Modify {!$ObjectType[primaryObj].Label} Fields" reRender="theNewPanel,theSubPanel">
+                                <apex:param name="firstparam" assignto="{!isFromLink}" value="true" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+               </apex:pageblockSectionitem>
+               <apex:pageblockSectionitem >
+               </apex:pageblockSectionitem>
+            </apex:pageblockSection>
+            
+            <apex:pageblockSection title="Child Objects (1)">
+                <apex:selectList id="firstLvlChilds" value="{!firstLvlChildObj}" size="1" label="Select child Object" 
+                    onchange="showSecObjectFields();" disabled="{!isDisableFirstChObj}">
+                    <apex:selectOptions value="{!FirstLvlChildObjects}"/>
+                    <apex:actionFunction name="showSecObjectFields" action="{!disSecObjFields}" status="statusBar" 
+                        reRender="secLvlChilds,thirdLvlObj,theNewPanel1,theSubPanel1">
+                        <apex:param name="firstparam" assignto="{!isFromLink}" value="false" />
+                    </apex:actionFunction>
+                </apex:selectList>
+                <apex:pageblockSectionitem >
+                    <apex:outputPanel id="theNewPanel1" styleclass="newPanel">
+                    <apex:outputPanel id="inPanel1" rendered="{!showFieldsSecond}">
+                        <c:MultiselectPicklist leftLabel="Available Fields"
+                            leftOption="{!FirtChildObjFields}"
+                            rightLabel="Selected Fields"
+                            rightOption="{!secondObjFields}"
+                            size="14"
+                            width="150px"/>
+                   </apex:outputPanel>
+                   </apex:outputPanel>
+                </apex:pageblockSectionitem>
+                <apex:pageblockSectionitem >
+                    <apex:outputPanel id="theSubPanel1">
+                        <apex:outputPanel id="theCountPanel1">
+                            <apex:outputLabel value="Selected Field Count" styleclass="selectedField" rendered="{!!showFieldsSecond}">
+                               <apex:outputText value="{!secondObjFields.size} Fields Selected" styleclass="showFieldCount" rendered="{!!showFieldsSecond}"/>
+                            </apex:outputLabel>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="theModifyPanel1" styleclass="newPanel">
+                            <apex:commandLink action="{!disSecObjFields}" rendered="{!!showFieldsSecond}" styleclass="modifyField"  
+                                         status="statusBar" value="Modify {!$ObjectType[firstLvlChildObj].Label} Fields" reRender="theNewPanel1,theSubPanel1">
+                                <apex:param name="firstparam" assignto="{!isFromLink}" value="true" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                    </apex:outputPanel>
+                </apex:pageblockSectionitem>
+            </apex:pageblockSection>
+            
+            <apex:pageblockSection title="Child Objects (2)">
+                <apex:selectList id="secLvlChilds" value="{!secondLvlChildObj}" size="1" label="Select child Object" 
+                    onchange="showThirdObjectFields();" disabled="{!isDisableSecChObj}">
+                    <apex:selectOptions value="{!SecLvlChildObjects}"/>
+                    <apex:actionFunction name="showThirdObjectFields" action="{!disThirdObjFields}" status="statusBar" 
+                        reRender="thirdLvlObj,theNewPanel2,theSubPanel2">
+                        <apex:param name="firstparam" assignto="{!isFromLink}" value="false" />
+                    </apex:actionFunction>
+                </apex:selectList>
+                <apex:pageblockSectionitem >
+                    <apex:outputPanel id="theNewPanel2" styleclass="newPanel">
+                    <apex:outputPanel id="inPanel2" rendered="{!showFieldsThird}">
+                        <c:MultiselectPicklist leftLabel="Available Fields"
+                            leftOption="{!SecChildObjFields}"
+                            rightLabel="Selected Fields"
+                            rightOption="{!thirdObjFields}"
+                            size="14"
+                            width="150px"/>
+                   </apex:outputPanel>
+                   </apex:outputPanel>
+               </apex:pageblockSectionitem>
+               <apex:pageblockSectionitem >
+                   <apex:outputPanel id="theSubPanel2">
+                        <apex:outputPanel id="theCountPanel2">
+                            <apex:outputLabel value="Selected Field Count" styleclass="selectedField" rendered="{!!showFieldsThird}">
+                                <apex:outputText value="{!thirdObjFields.size} Fields Selected" styleclass="showFieldCount" rendered="{!!showFieldsThird}"/>
+                            </apex:outputLabel>                            
+                        </apex:outputPanel>
+                        <apex:outputPanel id="theModifyPanel2" styleclass="newPanel">
+                            <apex:commandLink action="{!disThirdObjFields}" rendered="{!!showFieldsThird}" styleclass="modifyField"  
+                                         status="statusBar" value="Modify {!$ObjectType[secondLvlChildObj].Label} Fields" reRender="theNewPanel2,theSubPanel2">
+                                <apex:param name="firstparam" assignto="{!isFromLink}" value="true" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                   </apex:outputPanel>
+               </apex:pageblockSectionitem>
+           </apex:pageblockSection>
+           
+           <apex:pageblockSection title="Child Objects (3)"> 
+                <apex:selectList id="thirdLvlObj" value="{!thirdLvlChildObj}" size="1" label="Select child Object" 
+                    onchange="showForthObjectFields();" disabled="{!isDisableThirdChObj}">
+                    <apex:selectOptions value="{!ThirdLvlChildObjects}"/>
+                    <apex:actionFunction name="showForthObjectFields" action="{!disForthObjFields}" status="statusBar" 
+                        reRender="thirdLvlObj,theNewPanel3,theSubPanel3">
+                        <apex:param name="firstparam" assignto="{!isFromLink}" value="false" />
+                    </apex:actionFunction>   
+                </apex:selectList>
+                <apex:pageblockSectionitem >
+                    <apex:outputPanel id="theNewPanel3" styleclass="newPanel">
+                    <apex:outputPanel id="inPanel3" rendered="{!showFieldsForth}">
+                    <c:MultiselectPicklist leftLabel="Available Fields"
+                        leftOption="{!ThirdChildObjFields}"
+                        rightLabel="Selected Fields"
+                        rightOption="{!forthObjFields}"
+                        size="14"
+                        width="150px"/>
+                   </apex:outputPanel>
+                   </apex:outputPanel>
+               </apex:pageblockSectionitem>
+               <apex:pageblockSectionitem >
+                    <apex:outputPanel id="theSubPanel3">
+                        <apex:outputPanel id="theCountPanel3">
+                            <apex:outputLabel value="Selected Field Count" styleclass="selectedField" rendered="{!!showFieldsForth}">
+                                <apex:outputText value="{!forthObjFields.size} Fields Selected" styleclass="showFieldCount" rendered="{!!showFieldsForth}"/>
+                            </apex:outputLabel>
+                        </apex:outputPanel>
+                        <apex:outputPanel id="theModifyPanel3" styleclass="newPanel">
+                            <apex:commandLink action="{!disForthObjFields}" rendered="{!!showFieldsForth}" styleclass="modifyField"  
+                                         status="statusBar" value="Modify {!$ObjectType[thirdLvlChildObj].Label} Fields" reRender="theNewPanel3,theSubPanel3">
+                                <apex:param name="firstparam" assignto="{!isFromLink}" value="true" />
+                            </apex:commandLink>
+                        </apex:outputPanel>
+                   </apex:outputPanel>
+               </apex:pageblockSectionitem>
+            </apex:pageblockSection>
+        </apex:pageblock>
+    </apex:form>
+
+    <script>
+       $(document).ready(function(event){
+            $(document).on('component-hidden',function(event){
+                refresh();
+            });
+       });
+    </script>
+</apex:page>

@@ -1,0 +1,59 @@
+<!-- This is Page to dynamically add the Dream Map on button click as per the Sobject Selected.-->
+<apex:page Controller="DreamMapDetailsController" extensions="DisplayPopupExt" sidebar="false">
+        <!-- Css file added from static resource -->
+            <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps.css')}"/>
+            <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_Loading.css')}"/>
+            <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_Details.css')}"/>
+    <!-- End of CSS file -->
+    <apex:form >
+        <apex:outputpanel >
+                         <!-- Status Bar -->
+                  <apex:actionStatus id="statusBar" layout="block">
+                   <apex:facet name="start">
+                     <div id="assign-action-spinner-main">
+                        <div id="assign-action-spinner-content">
+                        <img src="/img/analytics/reportbuilder/icons/spinner32.gif" alt="Processing..." title="Processing..." /> 
+                        <p>Processing...</p>
+                     </div>
+                    </div>
+                  </apex:facet>
+                </apex:actionStatus>
+                <!-- End Of Status -->
+       </apex:outputpanel> 
+       <apex:actionFunction action="{!addGoalsAndObjectives}" name="popUpPageRedirection" reRender="popup">
+            <apex:param name="dreamMapDetails" value="" assignTo="{!clientIdExt}"/ >
+       </apex:actionFunction>
+        <!-- Start of PageBlock -->
+        <apex:pageBlock title="{!IF(OR(objConfigurationQuery == null, mapApiNameLabel == null, objConfigurationQuery.sObject_2__c == null),' ' ,(mapApiNameLabel[objConfigurationQuery.sObject_2__c] + ' '+ 'Details'))}" mode="edit" id="dreamMapSection" >
+        <apex:outputPanel id="errmsg">
+            <apex:pagemessages />
+        </apex:outputPanel> 
+             
+            <apex:pageBlockSection title="{!IF(OR(objConfigurationQuery == null, mapApiNameLabel == null, objConfigurationQuery.sObject_2__c == null),' ' ,(mapApiNameLabel[objConfigurationQuery.sObject_2__c] + ' '+ 'Details'))}" columns="2" rendered="{!NOT(ISNULL(objConfigurationQuery.sObject_2__c))}">
+                <apex:repeat value="{!accessibleFieldsForDreamMap}" var="fieldDreamMap">
+                    <apex:inputField value="{!objDreamMap[fieldDreamMap]}" rendered="{!!$ObjectType[objDreamMapName].fields[fieldDreamMap].AutoNumber}" 
+                    required="{!accessFieldsDreamMap[fieldDreamMap]}"/>
+                </apex:repeat>
+            </apex:pageBlockSection>
+            <apex:pageBlockButtons >
+                <apex:commandButton value="{!IF(OR(objConfigurationQuery == null, mapApiNameLabel == null, objConfigurationQuery.sObject_3__c == null),' ' ,('Save & Add' + ' ' + mapApiNameLabel[objConfigurationQuery.sObject_3__c]))}" action="{!saveDreamMap}" oncomplete="popUpPageRedirection('{!dreamMapIdForPopUp}');" 
+                        reRender="errmsg" status="statusBar" styleclass="saveAndAddGoalButton" rendered="{!showSave}"/>
+                <apex:outputpanel rendered="{!NOT(ISNULL(objConfigurationQuery))}">
+                    <apex:commandButton value="Cancel" action="{!CancelDreamMap}" styleclass="filterButton" immediate="true"/>
+                </apex:outputpanel>
+            </apex:pageBlockButtons>
+        </apex:pageBlock>
+         <!-- End of PageBlock -->
+    </apex:form>
+    <!-- Popup to add goals and objectives-->
+    <apex:outputPanel id="popup">
+        <apex:outputPanel id="OutputForPopUp" styleClass="popupBackgroundForObjectives" layout="block" rendered="{!popupForgoals}"> 
+            <apex:outputPanel styleClass="custPopupForObjectives" layout="block" rendered="{!popupForgoals}" style="height: 18%;">
+                <div id="dialog" >
+                    <apex:include pageName="DynamicQueryForContactGoalsPage" rendered="{!NOT(AND(ISNULL(objConfigurationQuery), ISNULL(strClientId)))}"></apex:include>
+                </div>
+            </apex:outputPanel>
+        </apex:outputPanel>
+    </apex:outputPanel> 
+    <!-- End of Popup -->
+</apex:page>

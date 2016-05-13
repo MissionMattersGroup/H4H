@@ -1,0 +1,153 @@
+<!-- This Page Retrieve Records from Object Configuration Objects based on Search Criteria -->
+<apex:page controller="CustomerSearchController" id="p1" 
+    showheader="true" sidebar="false">
+    <!-- Css file added from static resource -->
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_Loading.css')}" />
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_Details.css')}" />
+    <!-- End of CSS file -->
+    <apex:form id="f1">
+        <apex:pageMessages id="showmsg" />
+        <!-- Script to Search on Enter Key -->
+        <script type='text/javascript'>
+            function runOnEnter(ev) {
+                if (window.event && window.event.keyCode == 13
+                        || ev.which == 13) {
+                    searchAccRecs();
+                    return false;
+                } else {
+                    return true;
+                }
+            }            
+        </script>
+        <!--End Of Script-->       
+        <!-- Status Bar -->
+        <apex:outputpanel >
+            <apex:actionStatus id="statusBar" layout="block">
+                <apex:facet name="start">
+                    <div id="assign-action-spinner-main">
+                        <div id="assign-action-spinner-content">
+                            <img src="/img/analytics/reportbuilder/icons/spinner32.gif"
+                                alt="Processing..." title="Processing..." />
+                            <p>Processing...</p>
+                        </div>
+                    </div>
+                </apex:facet>
+            </apex:actionStatus>
+        </apex:outputpanel>
+        <!-- End Of Status -->
+
+        <!-- Start of PageBlock -->
+        <apex:pageBlock id="pb1">
+            <apex:pageBlockSection columns="4" id="pbs1">
+                 
+                <div align="left">
+                    <apex:outputPanel id="op1">
+                        <tr>
+                            <th>&nbsp; &nbsp; &nbsp; &nbsp; {!$Label.Select_Fields}
+                                &nbsp; <apex:selectList id="searchvalue"
+                                    value="{!searchTextValue}" multiselect="false" size="1">
+                                    <apex:selectOptions value="{!fieldNames}" />
+                                </apex:selectList>
+                                <p />
+                            </th>
+                            <th>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                &nbsp; {!$Label.Select_Operators} &nbsp; <apex:selectList id="searchoperator"
+                                    value="{!operatorsymbol}"
+                                    multiselect="false" size="1">
+                                    <apex:selectOptions value="{!operator}" />
+                                </apex:selectList>
+                                <p />
+                            </th>
+                            <th>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                {!$Label.Search_Text} &nbsp; <apex:inputText id="inputvalue"
+                                    value="{!InputText}" onkeypress="return runOnEnter(event);" />
+                            </th>
+                            <th>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                                <apex:commandButton value="Search"
+                                    reRender="pageBlock1,Op1,showmsg" action="{!searchingRecords}"
+                                    status="statusBar" styleclass="filterButton" /> 
+                                    <apex:actionFunction name="searchAccRecs" action="{!searchingRecords}"
+                                    reRender="pageBlock1,Op1,showmsg" status="statusBar" />
+                            </th>
+                        </tr>
+                    </apex:outputPanel>
+                </div>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+        <!-- End of pageblock -->
+
+        <!-- Start of Pageblock -->
+        <apex:outputPanel id="theOutPanelSearch"
+            rendered="{!objConLst.size > 0}">
+            
+            <apex:pageBlock title="{!mapApiNameLabel[objConLst[0].sObject_1__c]} Details"
+                id="pageBlock1">
+                
+               
+               
+                <apex:outputpanel >
+                    
+                    <apex:pageBlockTable value="{!sObjectList}" var="sObjRec"
+                        id="theTable">
+                        <apex:repeat value="{!fieldValue}" var="sObjField">
+                            <apex:column headerValue="{!$ObjectType[objName].fields[sObjField].Label}">
+                                <apex:facet name="header">
+                                     <apex:commandLink action="{!sortingRecords}"
+                                        value="{!$ObjectType[objName].fields[sObjField].Label}{!IF(sortExpression!=' ',
+                                                                                    IF(sortDirection='ASC','',''),'')}"
+                                        status="statusBar">
+                                        <apex:param value="{!$ObjectType[objName].fields[sObjField].Name}"
+                                            name="column" assignTo="{!sortExpression}"></apex:param>
+                                        <!-- Added -->
+                                        <apex:param value="{!$ObjectType[objName].fields[sObjField]}"
+                                            name="column" assignTo="{!sObjectField}"></apex:param>
+                                        <!-- End -->                                        
+                                    </apex:commandLink>
+                                </apex:facet>                                 
+                                <apex:outputField value="{!sObjRec[sObjField]}"/>
+                            </apex:column>
+                        </apex:repeat>
+                        <apex:column headerValue="Action">
+                            <apex:commandbutton styleclass="filterButton"
+                                value="Show {!mapApiNameLabel[objConLst[0].sObject_2__c]}"
+                                action="{!showDreamMap}" rerender="pageBlock1"
+                                status="statusBar" >
+                                <apex:param name="dreamMapDetails" value="{!sObjRec.Id}"
+                                    id="dreamMapId" />
+                            </apex:commandbutton>
+                        </apex:column>
+                    </apex:pageBlockTable>
+                </apex:outputpanel>
+                
+                <apex:pageblockButtons id="buttonBlockId" location="both">
+                
+                    <apex:commandButton value="First Page"  styleclass="{!IF( prev,'','filterButton')}"
+                        rerender="pageBlock1,buttonBlockId,f1" action="{!FirstPage}"
+                        disabled="{!prev}" status="statusBar"
+                        rendered="{!IF(sObjectList.size > 0, true, false)}"/>
+                    <apex:commandButton value="Previous" rerender="pageBlock1,f1" 
+                        styleclass="{!IF( prev,'','filterButton')}"
+                        action="{!previous}" disabled="{!prev}" status="statusBar"
+                        rendered="{!IF(sObjectList.size > 0, true, false)}"/>
+                    <apex:commandButton value="Next" rerender="pageBlock1,f1" 
+                        action="{!next}" disabled="{!Next}" styleclass="{!IF( Next,'','filterButton')}" status="statusBar" 
+                        rendered="{!IF(sObjectList.size > 0, true, false)}"/>
+                    <apex:commandButton value="Last Page" rerender="pageBlock1,f1" 
+                        styleclass="{!IF( Next,'','filterButton')}"
+                        action="{!LastPage}" disabled="{!Next}" status="statusBar"
+                        rendered="{!IF(sObjectList.size > 0, true, false)}"/>
+                    <apex:outputLabel value="Showing {!(OffsetSize)+1} - {!IF(totalRecs < (OffsetSize+LimitSize), 
+                                                   totalRecs, (OffsetSize+LimitSize))} Of {!totalRecs} Records"
+                        styleClass="labelClass" />
+                    <apex:selectList value="{!selectedVal}" size="1"
+                        onchange="doSearch();" styleClass="selectClass">
+                        <apex:selectOptions value="{!SelectOptionsForPagination}" />
+                    </apex:selectList>
+                    <apex:actionFunction name="doSearch" action="{!searchingRecords}"
+                        reRender="pageBlock1,theTable,f1" status="statusBar"/>
+                </apex:pageblockButtons>
+            </apex:pageBlock>
+        </apex:outputPanel>
+        <!-- End of PageBlock -->
+    </apex:form>   
+</apex:page>

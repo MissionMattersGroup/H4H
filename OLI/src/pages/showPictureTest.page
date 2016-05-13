@@ -1,0 +1,22 @@
+<apex:page id="showImagePage" standardController="OLI_Client__c" extensions="ShowPicture">
+
+    <style type="text/css">
+        body {background-color : #7b7aa2!important;}
+        .pic {
+            margin-left: auto;
+            margin-right: auto;
+            background-color : #7b7aa2;
+            border:2px solid #ffffff;
+            height=150px;
+            width=auto;
+            margin:15px auto;
+            padding:5px;
+        }
+    </style>
+    
+    <apex:outputpanel styleClass="pic" id="image" layout="block">
+         <apex:image value="{!URLFOR($Resource.PictureUploader, '/images/unknownperson.jpg')}" rendered="{!NOT( hasPicture )}" height="150" width="100"/>
+         <apex:image value="/servlet/servlet.FileDownload?file={!file.Id}" rendered="{!hasPicture}" height="150"/>
+    </apex:outputpanel>
+    
+</apex:page>

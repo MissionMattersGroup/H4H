@@ -1,0 +1,5 @@
+<apex:page standardController="Shelter_Call__c">
+    <flow:interview name="Create_Client_Record"  finishLocation="{!$Page.FinishPage}?id={!Shelter_Call__c.Id}">
+        <apex:param name="ShelterId" value="{!Shelter_Call__c.Id}"/>
+    </flow:interview>
+</apex:page>

@@ -1,0 +1,59 @@
+<!-- This Page show the list of Active Object Configuration and on selection redirects to customer search page for selected object configuration record -->
+<apex:page controller="DynamicObjectConfigurationController">
+    <!-- Css file added from static resource -->
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_Loading.css')}"/>
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_Details.css')}"/>
+    <head>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    </head>
+    <body>
+     <!-- End of CSS file -->
+        <apex:form >
+            <apex:outputpanel >
+            <!-- Status Bar -->
+                <apex:actionStatus id="statusBar" layout="block" >
+                    <apex:facet name="start">
+                        <div id="assign-action-spinner-main">
+                        <div id="assign-action-spinner-content">
+                        <img src="/img/analytics/reportbuilder/icons/spinner32.gif" alt="Processing..." title="Processing..." /> 
+                        <p>Processing...</p>
+                        </div>
+                        </div>
+                    </apex:facet>
+                </apex:actionStatus>
+            <!-- End of Status Bar -->
+            </apex:outputpanel>
+            
+            <apex:actionFunction name="passObjConfigNameToController" reRender="messages" status="statusBar">
+                <apex:param name="ObjConfigId" value="" assignTo="{!selectedObjConfig}"/>
+            </apex:actionFunction>
+            <apex:pageMessages id="messages" escape="false"/>
+            <!-- Start of PageBlock -->
+            <apex:pageBlock mode="edit" id="block">
+                <apex:pagemessage summary="No active object configuration records or incorrect custom setting values." severity="warning" strength="3" 
+                    rendered="{!ListObjConfigs.size == 0}"/>
+                <apex:pageBlockSection columns="1" title="{!sectionHeader}" rendered="{!ListObjConfigs.size > 0}">
+                    <apex:pageBlockTable value="{!ListObjConfigs}" var="objObjectConfig" >
+                        <apex:column value="{!objObjectConfig.Id}" rendered="false"/>
+                        <apex:column headervalue="Select" >
+                           <input type="radio" name="selectObjConfig" onClick="setObjConfigId('{!objObjectConfig.Id}');"/>
+                        </apex:column>
+                         <apex:repeat value="{!fieldList}" var="field">
+                             <apex:column value="{!objObjectConfig[field]}"/>
+                         </apex:repeat>
+                     </apex:pageBlockTable>
+                 <apex:commandButton value="Next" action="{!redirectCustomerSearchPage}" id="nextToSearchPage" reRender="messages" style="margin: 1% 47%; !important" status="statusBar" styleclass="filterButton"/>
+                </apex:pageBlockSection>
+            </apex:pageBlock>
+            <!-- Start of PageBlock -->
+        </apex:form>
+        <!-- Script to get the Object Config Id which is selected -->
+        <script>
+        function setObjConfigId(objConfigId){
+            if (objConfigId != null)
+            passObjConfigNameToController (objConfigId);
+        }
+        </script>
+        <!-- End of script -->
+    </body>
+</apex:page>

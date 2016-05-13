@@ -1,0 +1,105 @@
+<!-- This Page is used to add Goals and Objective for particular DreamMap -->
+<apex:page Controller="DynamicQueryForContactGoalsController" extensions="DisplayPopupExt" sidebar="false" showheader="false">
+
+    <!-- Css file added from static resource -->
+    <apex:stylesheet value="{!URLFOR($Resource.CssForDreamMap, '/DreamMaps_ObjectiveTable.css')}"/>
+    <!-- Css file added from static resource -->
+    
+    <!--Start Of Script-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <!--End Of Script-->
+    
+    <apex:form >
+        <div class="pageSection" id="thePageDiv">
+        <!-- Start of PageBlock -->
+        <apex:pageBlock title="{!IF(OR(objconfiguration == null, mapApiNameLabel == null, objconfiguration.sObject_3__c == null, objconfiguration.sObject_4__c == null),' ' ,(mapApiNameLabel[objconfiguration.sObject_3__c] + ' & ' + mapApiNameLabel[objconfiguration.sObject_4__c]))}" mode="edit" tabStyle="Account">
+            <apex:outputpanel id="errorMessage">
+                <apex:pageMessages />
+            </apex:outputPanel>
+            <!-- Start of PageBlockSection -->
+            <apex:pageBlockSection title="{!IF(OR(objconfiguration == null, mapApiNameLabel == null, objconfiguration.sObject_3__c == null),' ' ,('Fill' + ' ' + mapApiNameLabel[objconfiguration.sObject_3__c] + ' ' + 'Details'))}" columns="2"> 
+                <apex:repeat value="{!accessibleFieldsForGoals}" var="fieldgoals">
+                            <!-- apex:facet name="header">{!$ObjectType[objGoalName].fields[fieldgoals].Label}</apex:facet -->
+                            <apex:inputField value="{!objGoal[fieldgoals]}" rendered="{!goalField != $ObjectType[objGoalName].fields[fieldgoals].Label}" required="{!accessibleFieldsGoals[fieldgoals]}"/>
+                 </apex:repeat>
+            </apex:pageBlockSection>
+            <!-- End of PageBlockSection -->
+            <br/> <br/>
+          
+             <!-- Status Bar -->
+             <apex:outputpanel >
+	             <apex:actionStatus id="statusBar" layout="block">
+	                 <apex:facet name="start">
+	                     <div id="assign-action-spinner-main">
+	                     <div id="assign-action-spinner-content">
+	                     <img src="/img/analytics/reportbuilder/icons/spinner32.gif" alt="Processing..." title="Processing..." /> 
+	                     <p>Processing...</p>
+	                     </div>
+	                     </div>
+	                 </apex:facet>
+	             </apex:actionStatus>
+             </apex:outputpanel>
+             <!-- End Of Status -->
+          
+          <!-- Start of PageBlockSection -->
+            <apex:pageBlockSection title="{!IF(OR(objconfiguration == null, mapApiNameLabel == null, objconfiguration.sObject_4__c == null),' ' ,('Fill' + ' ' + mapApiNameLabel[objconfiguration.sObject_4__c] + ' ' + 'Details'))}" id="pbSection">
+            
+                <apex:outputPanel id="thePanel" layout="block"> 
+                    <div id="dialog" height="800" width="200" style="width:100% !important">
+                    <table class="tableClassforGoalObjective" id="objectiveTable">
+                         <tr class="objectiveTableData sorterTableRow">
+                             <apex:repeat value="{!accessibleFieldsForObjectives}" var="fieldsForObjective" >
+                             <apex:outputText rendered="{!goalField != $ObjectType[objObjectiveName].fields[fieldsForObjective].Label}">
+                                 <th>{!$ObjectType[objObjectiveName].fields[fieldsForObjective].Label}</th>
+                             </apex:outputText>
+                             </apex:repeat>
+                         </tr>
+                         
+                         <apex:repeat value="{!lstForthObj}" var="lstObj">
+                             <tr class="ChildRepeatTrForDm">
+                                 <apex:repeat value="{!accessibleFieldsForObjectives}" var="fieldsForObjective">
+                                  <td>
+                                     <apex:inputField id="inputfield1" value="{!lstObj[fieldsForObjective]}" 
+                                     rendered="{!goalField != $ObjectType[objObjectiveName].fields[fieldsForObjective].Label}" 
+                                     required="{!accessFieldsObjectives[fieldsForObjective]}"/>
+                                  </td>
+                                 </apex:repeat>
+                             </tr>
+                         </apex:repeat>
+                     </table>
+                     </div>
+                 </apex:outputPanel>
+            </apex:pageBlockSection>
+            <!-- End of PageBlockSection -->
+            <apex:actionFunction name="cancelPopup" action="{!Cancel}" >
+                
+            </apex:actionFunction>
+            <apex:actionFunction action="{!saveGoal}" name="saveGoals" reRender="popup,errorMessage">
+                <apex:param name="dreamMapDetails" value="{!clientIdExt}"/ >
+            </apex:actionFunction>
+            <!-- Start of pageBlockButtons -->
+            <apex:pageBlockButtons location="bottom">
+                <apex:outputpanel rendered="{!NOT(ISNULL(objconfiguration))}">
+	                <apex:commandButton value="Add Row" action="{!addObjectiveSection}" immediate="true" styleclass="filterButton" reRender="thePanel" status="statusBar"/>
+	                <apex:commandButton value="Remove Row" action="{!addRemoveObjectiveSection}" immediate="true" styleclass="filterButton" reRender="thePanel,errorMessage" status="statusBar"/>
+	                <apex:commandButton value="Save" onclick="saveGoals();" 
+	                        reRender="thePage" status="statusBar" title="Save" styleclass="filterButton" />
+	                <apex:commandButton value="Cancel" action="{!cancelFromController}" immediate="true" styleclass="filterButton" reRender="thePanel" status="statusBar">
+	                    <apex:param name="dreamMapDetails" value="{!clientIdExt}"/ >
+	                </apex:commandButton>
+	            </apex:outputpanel>
+            </apex:pageBlockButtons>
+            <!-- End of pageBlockButtons -->
+        </apex:pageBlock>
+        <!-- End of PageBlock -->
+        </div>
+    </apex:form>
+    <!-- Start of Script -->
+    <!-- This script is used to hide the datePicker on scroll bar -->
+    <script>
+        $(".pbSubsection").scroll(function () {
+            $('#datePicker').hide(); 
+        });
+    </script>
+    <!-- End of Script -->
+  </apex:page>
